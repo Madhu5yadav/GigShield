@@ -34,7 +34,10 @@ def health_check():
         "status": "ONLINE",
         "version": "v2.0-xgboost-rag",
         "endpoints": [
-            "GET /api/v1/analyze_cashflow",
+            "GET /api/v1/analyze_cashflow?worker_id=GIG-W-002",
+            "GET /api/v1/workers",
+            "POST /api/v1/analyze_custom_data",
+            "POST /api/v1/upload_dataset",
             "POST /api/v1/accept_advance",
             "POST /api/v1/explain_policy",
             "POST /api/v1/regenerate_data"
@@ -143,6 +146,75 @@ def explain_policy():
             "error": "Failed to execute semantic retrieval on local vector database",
             "details": str(e)
         }), 500
+
+@app.route("/api/v1/workers", methods=["GET"])
+def list_workers():
+    """Returns list of all available worker profiles in the synthetic panel dataset."""
+    try:
+        raw_data = get_or_create_aa_data()
+        profiles = raw_data.get("worker_profiles", {})
+        if not profiles and "account_info" in raw_data:
+            profiles = {raw_data["account_info"]["worker_id"]: raw_data["account_info"]}
+        return jsonify({
+            "status": "SUCCESS",
+            "total_workers": len(profiles),
+            "workers": list(profiles.values())
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to fetch worker list", "details": str(e)}), 500
+
+@app.route("/api/v1/analyze_custom_data", methods=["POST"])
+def analyze_custom_data():
+    """
+    Endpoint: Underwrites ANY custom synthetic dataset or test case JSON payload provided by the user.
+    Body format:
+    {
+       "worker_name": "Custom User",
+       "platform": "Swiggy",
+       "transactions": [ {"date": "2026-03-01", "amount": 1500, "type": "CREDIT"}, ... ]
+    }
+    """
+    try:
+        custom_payload = request.get_json() or {}
+        if not custom_payload.get("transactions"):
+            return jsonify({
+                "error": "Invalid payload format. Must include a 'transactions' array containing credit/debit records."
+            }), 400
+
+        target_worker_id = custom_payload.get("worker_id", "CUSTOM-W-999")
+        if "account_info" not in custom_payload:
+            custom_payload["account_info"] = {
+                "worker_id": target_worker_id,
+                "worker_name": custom_payload.get("worker_name", "Custom Test User"),
+                "platform": custom_payload.get("platform", "Custom Platform")
+            }
+
+        engine = RiskEngine(custom_payload, target_worker_id=target_worker_id)
+        decision = engine.evaluate_risk()
+        return jsonify({
+            "status": "SUCCESS",
+            "custom_underwriting_result": decision
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to underwrite custom dataset", "details": str(e)}), 500
+
+@app.route("/api/v1/upload_dataset", methods=["POST"])
+def upload_dataset():
+    """Endpoint: Overwrite or save a custom synthetic dataset JSON file directly on the server."""
+    try:
+        custom_data = request.get_json()
+        if not custom_data or "transactions" not in custom_data:
+            return jsonify({"error": "Payload must contain a valid dataset with 'transactions'."}), 400
+
+        with open(DATA_FILE, "w") as f:
+            json.dump(custom_data, f, indent=2)
+
+        return jsonify({
+            "status": "SUCCESS",
+            "message": "Custom synthetic dataset successfully saved to server!"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to upload custom dataset", "details": str(e)}), 500
 
 @app.route("/api/v1/regenerate_data", methods=["POST"])
 def regenerate_data():

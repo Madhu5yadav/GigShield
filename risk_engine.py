@@ -15,8 +15,10 @@ class RiskEngine:
     """
     def __init__(self, raw_json_data, target_worker_id="GIG-W-001"):
         self.raw_data = json.loads(raw_json_data) if isinstance(raw_json_data, str) else raw_json_data
-        self.account_info = self.raw_data.get("account_info", {})
-        self.target_worker_id = target_worker_id or self.account_info.get("worker_id", "GIG-W-001")
+        profiles = self.raw_data.get("worker_profiles", {})
+        
+        self.target_worker_id = target_worker_id or "GIG-W-001"
+        self.account_info = profiles.get(self.target_worker_id) or self.raw_data.get("account_info", {})
         self.df = self._preprocess_data(self.raw_data.get("transactions", []))
 
     def _preprocess_data(self, txns):
@@ -175,7 +177,10 @@ class RiskEngine:
         is_eligible = bool(risk_score >= 550 and predicted_income > 1000 and max_advance > 0)
 
         return {
-            "worker_id": self.account_info.get("worker_id", "GIG-W-001"),
+            "worker_id": self.account_info.get("worker_id", self.target_worker_id),
+            "worker_name": self.account_info.get("worker_name", "Gig Economy Partner"),
+            "platform": self.account_info.get("platform", "Multi-platform"),
+            "worker_type": self.account_info.get("worker_type", "HUSTLER"),
             "risk_score": risk_score,
             "predicted_7day_income": predicted_income,
             "max_eligible_advance": max_advance,
