@@ -27,12 +27,24 @@ class RiskEngine:
             
         df = pd.DataFrame(txns)
         df["date"] = pd.to_datetime(df["date"])
+        if "worker_id" not in df.columns:
+            df["worker_id"] = self.target_worker_id
         
         # Calculate NET CASH-FLOW (Credits - Debits)
-        credits = df[df["type"] == "CREDIT"].groupby(["worker_id", "date"])["amount"].sum().reset_index()
-        debits = df[df["type"] == "DEBIT"].groupby(["worker_id", "date"])["amount"].sum().reset_index()
+        credits = df[df["type"] == "CREDIT"].groupby(["worker_id", "date"])["amount"].sum().reset_index() if "CREDIT" in df["type"].values else pd.DataFrame(columns=["worker_id", "date", "amount"])
+        debits = df[df["type"] == "DEBIT"].groupby(["worker_id", "date"])["amount"].sum().reset_index() if "DEBIT" in df["type"].values else pd.DataFrame(columns=["worker_id", "date", "amount"])
         
-        merged = pd.merge(credits, debits, on=["worker_id", "date"], how="outer", suffixes=('_in', '_out')).fillna(0)
+        if credits.empty and not debits.empty:
+            merged = debits.rename(columns={"amount": "amount_out"})
+            merged["amount_in"] = 0.0
+        elif debits.empty and not credits.empty:
+            merged = credits.rename(columns={"amount": "amount_in"})
+            merged["amount_out"] = 0.0
+        elif not credits.empty and not debits.empty:
+            merged = pd.merge(credits, debits, on=["worker_id", "date"], how="outer", suffixes=('_in', '_out')).fillna(0)
+        else:
+            merged = pd.DataFrame(columns=["worker_id", "date", "amount_in", "amount_out"])
+
         merged['net_margin'] = merged['amount_in'] - merged['amount_out']
         merged['amount'] = merged['amount_in'] 
         

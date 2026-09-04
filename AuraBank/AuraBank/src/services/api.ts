@@ -101,3 +101,15 @@ export async function queryPolicyRag(question: string): Promise<PolicyRagRespons
     return { ai_explanation: "Local FAISS vector RAG unreachable." };
   }
 }
+
+export async function fetchWorkerList(): Promise<any[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/workers`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.workers || [];
+  } catch (error) {
+    console.error("API Error (workers):", error);
+    return [];
+  }
+}

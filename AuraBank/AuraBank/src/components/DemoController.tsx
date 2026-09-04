@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAura } from '../context/AuraContext';
 
+import { TestProfileSelectorModal } from './TestProfileSelectorModal';
+
 export const DemoController: React.FC = () => {
   const { userAccount, balance, advanceState, isBankOfficerView, setIsBankOfficerView, setActiveTab } = useAura();
   const [collapsed, setCollapsed] = useState(false);
+  const [showSelector, setShowSelector] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -38,20 +41,26 @@ export const DemoController: React.FC = () => {
 
       {!collapsed && (
         <View style={styles.infoRow}>
-          <Pressable style={styles.userBadge} onPress={() => setActiveTab('profile')}>
-            <Ionicons name="person-circle-outline" size={14} color="#059669" />
+          <Pressable style={styles.userBadge} onPress={() => setShowSelector(true)}>
+            <Ionicons name="swap-horizontal" size={14} color="#059669" />
             <Text style={styles.userBadgeText}>{userAccount.name}</Text>
+            <Text style={{ fontSize: 10, color: '#059669', fontWeight: '700' }}>(Switch)</Text>
           </Pressable>
 
           <Text style={styles.balText}>DB Bal: ₹{balance.toLocaleString('en-IN')}</Text>
 
-          <View style={styles.statusPill}>
+          <Pressable style={styles.statusPill} onPress={() => setShowSelector(true)}>
             <Text style={styles.statusPillText}>
-              {advanceState === 'accepted' ? 'Advance Active' : advanceState === 'repaid' ? 'Advance Repaid' : 'Dynamic Calc'}
+              Test Cases ⚡
             </Text>
-          </View>
+          </Pressable>
         </View>
       )}
+
+      <TestProfileSelectorModal
+        visible={showSelector}
+        onClose={() => setShowSelector(false)}
+      />
     </View>
   );
 };

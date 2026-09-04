@@ -62,14 +62,18 @@ def run_suite():
             res = requests.post(f"{BASE_URL}/analyze_custom_data", json=case["payload"])
             data = res.json().get("custom_underwriting_result", {})
             
-            print(f"  • Worker Name          : {data.get('worker_name')} ({data.get('platform')})")
-            print(f"  • Risk Score           : {data.get('risk_score')} / 850")
-            print(f"  • Predicted 7-Day Inc. : ₹{data.get('predicted_7day_income'):,.2f}")
-            print(f"  • Max Safe Advance     : ₹{data.get('max_eligible_advance'):,.2f}")
-            print(f"  • Underwriting Decision: {'APPROVED ✅' if data.get('is_eligible') else 'REJECTED ❌'}")
-            print(f"  • Anomalies Clipped    : {data.get('explainable_ai_metrics', {}).get('isolation_forest_anomalies_detected')}")
+            pred_inc = data.get('predicted_7day_income') or 0.0
+            max_adv = data.get('max_eligible_advance') or 0.0
+            risk_sc = data.get('risk_score') or 300
+
+            print(f"  - Worker Name          : {data.get('worker_name', 'Unknown')} ({data.get('platform', 'N/A')})")
+            print(f"  - Risk Score           : {risk_sc} / 850")
+            print(f"  - Predicted 7-Day Inc. : Rs.{pred_inc:,.2f}")
+            print(f"  - Max Safe Advance     : Rs.{max_adv:,.2f}")
+            print(f"  - Underwriting Decision: {'APPROVED [OK]' if data.get('is_eligible') else 'REJECTED [X]'}")
+            print(f"  - Anomalies Clipped    : {data.get('explainable_ai_metrics', {}).get('isolation_forest_anomalies_detected', 0)}")
         except Exception as e:
-            print(f"  ❌ Error: {e}")
+            print(f"  [ERROR]: {e}")
             
     print("\n" + "=" * 70)
     print("  [SUCCESS] All custom test cases executed successfully against Flask backend.")
