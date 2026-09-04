@@ -1,10 +1,27 @@
-// src/services/api.ts
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-// NOTE FOR LOCAL TESTING: 
-// - If running on Web / iOS Simulator: use "http://localhost:5000/api/v1"
-// - If running on Android Emulator: use "http://10.0.2.2:5000/api/v1"
-// - If testing on a physical device: use your laptop's local LAN IP (e.g., "http://192.168.1.x:5000/api/v1")
-const API_BASE_URL = "http://localhost:5000/api/v1";
+const getApiBaseUrl = (): string => {
+  // Auto-detect host IP when running via Expo Go on physical mobile devices!
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.debuggerHost || (Constants.manifest as any)?.debuggerHost;
+  
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+      return `http://${ip}:5000/api/v1`;
+    }
+  }
+
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:5000/api/v1';
+  }
+
+  // Active Laptop LAN IP fallback for physical phone testing
+  return 'http://10.175.115.108:5000/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+console.log('[API] Connected API Endpoint:', API_BASE_URL);
 
 export interface CashflowAnalysisResponse {
   worker_id: string;
