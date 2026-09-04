@@ -509,20 +509,21 @@ export const AuraProvider: React.FC<{ children: React.ReactNode }> = ({ children
         value: `${resilienceScore}/100`,
       };
     } else {
-      // Query policy RAG from local Flask FAISS server for specific policy questions
+      // Query policy RAG or external generative AI from local Flask server
       const ragRes = await queryPolicyRag(question);
       if (ragRes && ragRes.ai_explanation && !ragRes.ai_explanation.includes("unreachable")) {
         botText = ragRes.ai_explanation;
         if (ragRes.retrieved_context) {
+          const isLocalDb = ragRes.source === "LOCAL_VECTOR_DB";
           dataCard = {
-            type: 'advance_reason',
-            title: 'FAISS Semantic Vector RAG Retrieval',
+            type: isLocalDb ? 'advance_reason' : 'forecast',
+            title: isLocalDb ? 'FAISS Semantic Vector RAG Retrieval' : 'AURA AI Financial Advisor',
             details: [
               ragRes.retrieved_context.length > 200
                 ? `${ragRes.retrieved_context.substring(0, 200)}...`
                 : ragRes.retrieved_context,
             ],
-            value: 'RBI Policy Grounded',
+            value: isLocalDb ? 'RBI Policy Grounded' : 'General AI Domain Advice',
           };
         }
       } else {

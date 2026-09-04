@@ -56,6 +56,8 @@ export interface AcceptAdvanceResponse {
 
 export interface PolicyRagResponse {
   query?: string;
+  source?: string;
+  distance?: number;
   retrieved_context?: string;
   ai_explanation: string;
   error?: string;
