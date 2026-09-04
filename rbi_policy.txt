@@ -1,0 +1,9 @@
+[DOC_1] Key Fact Statement (KFS) Mandate: RBI Digital Lending Guidelines require regulated entities and LSPs to provide a standardized Key Fact Statement (KFS) to borrowers before executing any credit agreement. The KFS must clearly state the Annual Percentage Rate (APR), total cost of credit, flat convenience fee (fixed at ₹10 for AURA advances), cooling-off period, and exact repayment schedule with zero hidden charges.
+
+[DOC_2] Account Aggregator (AA) Framework & Privacy: Under the Reserve Bank of India AA ecosystem and DPDP Act 2023, financial telemetry is retrieved purely based on explicit user consent. Bank statement data is end-to-end encrypted and analyzed solely for cash-flow underwriting, income velocity forecasting, and liquidity gap detection without storing raw credentials.
+
+[DOC_3] Open Credit Enablement Network (OCEN 4.0) & UPI AutoPay: OCEN standards define the protocol for embedded digital lending. Repayment mandates are registered via UPI AutoPay or e-NACH for source-deduction. On payout days, funds are automatically routed to settle outstanding micro-credit advances prior to releasing remaining wages to the gig worker.
+
+[DOC_4] Fair Lending & Zero Predatory Pricing: AURA enforces strict algorithmic guardrails: micro-credit advances are capped at a maximum of 20% of the worker's projected 7-day net cash flow. Interest rates are 0% (zero predatory interest), charging only a flat, transparent ₹10 platform fee.
+
+[DOC_5] Grievance Redressal & Cooling-off Period: Borrowers are granted an explicit cooling-off / look-up period of 3 days during which micro-advances can be repaid without any exit penalty or additional interest fees. A dedicated Nodal Grievance Officer handles all credit disputes.

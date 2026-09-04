@@ -58,14 +58,18 @@ class RealLocalRAG:
         retrieved_snippets = []
         for idx in indices[0]:
             if idx < len(self.chunks):
-                retrieved_snippets.append(self.chunks[idx])
+                snippet = self.chunks[idx]
+                # Strip bracket headers like [DOC_1]
+                if "]" in snippet:
+                    snippet = snippet.split("]", 1)[-1].strip()
+                retrieved_snippets.append(snippet)
 
-        context_text = "\n".join(retrieved_snippets)
+        matched_text = retrieved_snippets[0] if retrieved_snippets else "No matching policy rule found."
         
         return {
             "query": user_query,
-            "retrieved_context": context_text,
-            "ai_explanation": f"Retrieved via Local Semantic FAISS Vector Search. Grounded Policy: {retrieved_snippets[0]}"
+            "retrieved_context": matched_text,
+            "ai_explanation": f"Grounded RBI & AURA Policy: {matched_text}"
         }
 
 if __name__ == "__main__":
