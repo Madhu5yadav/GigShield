@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+env/
+venv/
+*.sqlite3
+
+# Node & Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Zip files & heavy archives
+AuraBank.zip
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
